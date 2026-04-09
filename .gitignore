@@ -1,0 +1,19 @@
+venv/
+env/
+.venv/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+db.sqlite3
+media/
+staticfiles/
+local_settings.py
+.env
+.env.local
+.vscode/
+.idea/
+*.sublime-*
+*.log
+*.tmp
+.DS_Store (на macOS)
