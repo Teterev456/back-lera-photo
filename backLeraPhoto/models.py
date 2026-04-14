@@ -4,7 +4,7 @@ from django.db import models
 
 class Booking(models.Model):
     name = models.CharField(max_length=100)
-    phone = models.CharField(max_length=20)
+    email = models.EmailField(max_length=20)
     chosenType = models.CharField(max_length=50)
     chosenDate = models.DateField()
     chosenTime = models.CharField(max_length=5)
