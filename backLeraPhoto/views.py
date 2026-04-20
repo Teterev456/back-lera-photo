@@ -2,8 +2,9 @@ from django.shortcuts import render
 
 # Create your views here.
 from rest_framework import generics
-from .models import Booking
-from .serializers import BookingSerializer
+from rest_framework import permissions
+from .models import Booking, BookingCategory
+from .serializers import BookingSerializer, BookingCategorySerializer
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -14,9 +15,20 @@ from .serializers import UserSerializer
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+class BookingCategoryListView(generics.ListAPIView):
+    queryset = BookingCategory.objects.all()
+    serializer_class = BookingCategorySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
 class BookingListCreateView(generics.ListCreateAPIView):
-    queryset = Booking.objects.all()
     serializer_class = BookingSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Booking.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()

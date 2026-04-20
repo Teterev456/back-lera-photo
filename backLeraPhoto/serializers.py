@@ -1,9 +1,14 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Booking
+from .models import Booking, BookingCategory
+
+class BookingCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BookingCategory
+        fields = ['id', 'title']
 
 class BookingSerializer(serializers.ModelSerializer):
-    chosenDate = serializers.DateField(input_formats=['%d-%m-%Y', '%d/%m/%Y', '%Y-%m-%d'])
+    chosen_date = serializers.DateField(input_formats=['%d-%m-%Y', '%d/%m/%Y', '%Y-%m-%d'])
 
     class Meta:
         model = Booking
