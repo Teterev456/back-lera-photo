@@ -67,18 +67,19 @@ class CurrentUserView(APIView):
 
 class LoginView(APIView):
     permission_classes = [AllowAny]
-    
+
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
-        
+
         user = authenticate(username=username, password=password)
-        
+
         if user:
             refresh = RefreshToken.for_user(user)
-            
+
             response = Response({
-                'message': 'Login successful',
+                'access': str(refresh.access_token),
+                'refresh': str(refresh),
                 'user': {
                     'id': user.id,
                     'username': user.username,
@@ -104,7 +105,7 @@ class LoginView(APIView):
                 path='/',
                 max_age=1 * 24 * 60 * 60,
             )
-            
+
             return response
         else:
             return Response({'error': 'Invalid credentials'}, status=401)
