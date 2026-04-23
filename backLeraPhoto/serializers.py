@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Booking, BookingCategory
+from .models import Booking, BookingCategory, BookingChat
 
 class BookingCategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -13,6 +13,19 @@ class BookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
         fields = '__all__'
+
+class BookingChatSerializer(serializers.ModelSerializer):
+    author_name = serializers.ReadOnlyField(source='author.username')
+    author_id = serializers.ReadOnlyField(source='author.id')
+    is_admin = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BookingChat
+        fields = ['id', 'author_id', 'author_name', 'text', 'created_at', 'is_admin']
+        read_only_fields = ['id', 'created_at', 'author', 'booking']
+
+    def get_is_admin(self, obj):
+        return obj.author.is_staff
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)

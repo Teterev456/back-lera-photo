@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Booking, BookingCategory
+from .models import Booking, BookingCategory, BookingChat
 
 # Register your models here.
 
@@ -45,3 +45,14 @@ class BookingAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+
+@admin.register(BookingChat)
+class BookingChatAdmin(admin.ModelAdmin):
+    list_display = ('id', 'booking', 'author', 'text_preview', 'created_at')
+    list_filter = ('created_at', 'author')
+    search_fields = ('text', 'booking__id', 'author__username')
+    readonly_fields = ('created_at',)
+
+    def text_preview(self, obj):
+        return obj.text[:50] + '…' if len(obj.text) > 50 else obj.text
+    text_preview.short_description = 'Текст сообщения'

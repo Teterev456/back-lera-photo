@@ -3,15 +3,14 @@ from django.shortcuts import render
 # Create your views here.
 from rest_framework import generics
 from rest_framework import permissions
-from .models import Booking, BookingCategory
-from .serializers import BookingSerializer, BookingCategorySerializer
+from .models import Booking, BookingCategory, BookingChat
+from .serializers import BookingSerializer, BookingCategorySerializer, BookingChatSerializer, UserSerializer
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import User
-from .serializers import UserSerializer
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.views import TokenObtainPairView
 
@@ -29,6 +28,23 @@ class BookingListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+class BookingChatListCreateView(generics.ListCreateAPIView):
+    serializer_class = BookingChatSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        booking_id = self.kwargs['booking_id']
+        booking = generics.get_object_or_404(Booking, id=booking_id)
+        if booking.user != self.request.user and not self.request.user.is_staff:
+            raise PermissionDenied("You do not have access to this booking")
+        return BookingChat.objects.filter(booking=booking)
+
+    def perform_create(self, serializer):
+        booking = generics.get_object_or_404(Booking, id=self.kwargs['booking_id'])
+        if booking.user != self.request.user and not self.request.user.is_staff:
+            raise PermissionDenied("You cannot message in this booking")
+        serializer.save(author=self.request.user, booking=booking)
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()

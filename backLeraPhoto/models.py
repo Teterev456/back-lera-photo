@@ -43,3 +43,23 @@ class Booking(models.Model):
 
     def __str__(self):
         return f"Booking #{self.id} by {self.user.username}"
+
+class BookingChat(models.Model):
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='messages'
+    )
+    booking = models.ForeignKey(
+        'Booking',
+        on_delete=models.CASCADE,
+        related_name='messages'
+    )
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"Message {self.id} for Booking {self.booking.id}"
