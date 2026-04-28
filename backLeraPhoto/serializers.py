@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Booking, BookingCategory, BookingChat
+from .models import Booking, BookingCategory, BookingChat, ContactMessage
 
 class BookingCategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -41,3 +41,9 @@ class UserSerializer(serializers.ModelSerializer):
             password=validated_data['password']
         )
         return user
+
+class ContactMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContactMessage
+        fields = ['id', 'name', 'email', 'message', 'created_at']
+        read_only_fields = ['id', 'created_at']

@@ -3,8 +3,8 @@ from django.shortcuts import render
 # Create your views here.
 from rest_framework import generics
 from rest_framework import permissions
-from .models import Booking, BookingCategory, BookingChat
-from .serializers import BookingSerializer, BookingCategorySerializer, BookingChatSerializer, UserSerializer
+from .models import Booking, BookingCategory, BookingChat, ContactMessage
+from .serializers import BookingSerializer, BookingCategorySerializer, BookingChatSerializer, UserSerializer, ContactMessageSerializer
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -133,3 +133,7 @@ class LoginView(APIView):
             return response
         else:
             return Response({'error': 'Invalid credentials'}, status=401)
+
+class ContactMessageCreateView(generics.CreateAPIView):
+    serializer_class = ContactMessageSerializer
+    permission_classes = [permissions.AllowAny]

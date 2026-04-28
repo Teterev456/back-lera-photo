@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Booking, BookingCategory, BookingChat
+from .models import Booking, BookingCategory, BookingChat, ContactMessage
 
 # Register your models here.
 
@@ -56,3 +56,10 @@ class BookingChatAdmin(admin.ModelAdmin):
     def text_preview(self, obj):
         return obj.text[:50] + '…' if len(obj.text) > 50 else obj.text
     text_preview.short_description = 'Текст сообщения'
+
+@admin.register(ContactMessage)
+class ContactMessageAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'email', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('name', 'email', 'message')
+    readonly_fields = ('created_at',)
