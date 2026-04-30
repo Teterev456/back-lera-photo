@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import BookingListCreateView, CurrentUserView, LoginView, BookingCategoryListView, BookingChatListCreateView, UserDetailUpdateView, ContactMessageCreateView
+from .views import BookingListCreateView, CurrentUserView, LoginView, BookingCategoryListView, BookingChatListCreateView, UserDetailUpdateView, ContactMessageCreateView, AllBookingsListView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from backLeraPhoto.views import RegisterView, LogoutView
 
@@ -14,4 +14,6 @@ urlpatterns = [
     path('user/update/', UserDetailUpdateView.as_view(), name='user-detail'),
     path('bookings/<int:booking_id>/messages/', BookingChatListCreateView.as_view()),
     path('contact/', ContactMessageCreateView.as_view(), name='contact'),
+
+    path('admin/bookings/', AllBookingsListView.as_view(), name='admin-bookings')
 ]

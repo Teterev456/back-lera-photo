@@ -8,6 +8,8 @@ class BookingCategorySerializer(serializers.ModelSerializer):
         fields = ['id', 'title']
 
 class BookingSerializer(serializers.ModelSerializer):
+    user_name = serializers.CharField(source='user.username', read_only=True)
+    user_id = serializers.IntegerField(source='user.id', read_only=True)
     chosen_date = serializers.DateField(input_formats=['%d-%m-%Y', '%d/%m/%Y', '%Y-%m-%d'])
 
     class Meta:
@@ -32,7 +34,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password']
+        fields = ['id', 'username', 'email', 'password', 'is_staff']
 
     def create(self, validated_data):
         user = User.objects.create_user(
@@ -47,3 +49,18 @@ class ContactMessageSerializer(serializers.ModelSerializer):
         model = ContactMessage
         fields = ['id', 'name', 'email', 'message', 'created_at']
         read_only_fields = ['id', 'created_at']
+
+class AdminBookingSerializer(serializers.ModelSerializer):
+    user_name = serializers.CharField(source='user.username', read_only=True, default='')
+    type_title = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Booking
+        fields = ['id', 'user_name', 'type', 'type_title', 'chosen_date', 'chosen_time',
+                  'status', 'price', 'extra_info', 'created_at']
+
+    def get_type_title(self, obj):
+        return obj.type.title if obj.type else "НЕИЗВЕСТНАЯ"
+
+    def get_user_name(self, obj):
+        return obj.user.username if obj.user else "Аноним"

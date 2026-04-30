@@ -4,15 +4,18 @@ from django.shortcuts import render
 from rest_framework import generics
 from rest_framework import permissions
 from .models import Booking, BookingCategory, BookingChat, ContactMessage
-from .serializers import BookingSerializer, BookingCategorySerializer, BookingChatSerializer, UserSerializer, ContactMessageSerializer
+from .serializers import BookingSerializer, BookingCategorySerializer, BookingChatSerializer, UserSerializer, ContactMessageSerializer, AdminBookingSerializer
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+from rest_framework import filters
+from django.db.models import Q
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 class BookingCategoryListView(generics.ListAPIView):
@@ -137,3 +140,43 @@ class LoginView(APIView):
 class ContactMessageCreateView(generics.CreateAPIView):
     serializer_class = ContactMessageSerializer
     permission_classes = [permissions.AllowAny]
+
+class AdminOnlyView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def get(self, request):
+        return Response({'message': 'Welcome, admin!'})
+
+class AllBookingsListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    serializer_class = AdminBookingSerializer
+    def get_queryset(self):
+        queryset = Booking.objects.all()
+
+        type_id = self.request.query_params.get('type')
+        if type_id:
+            queryset = queryset.filter(type_id=type_id)
+
+        status = self.request.query_params.get('status')
+        if status and status != 'all':
+            queryset = queryset.filter(status=status)
+
+        search = self.request.query_params.get('search')
+        
+        if search:
+            try:
+                search_int = int(search)
+                queryset = queryset.filter(
+                    Q(id=search_int) |
+                    Q(user__username__icontains=search) |
+                    Q(extra_info__icontains=search)
+                )
+            except ValueError:
+                queryset = queryset.filter(
+                    Q(user__username__icontains=search) |
+                    Q(extra_info__icontains=search)
+                )
+
+        ordering = self.request.query_params.get('ordering', '-created_at')
+        queryset = queryset.order_by(ordering)
+        return queryset
