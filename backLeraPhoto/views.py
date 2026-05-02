@@ -4,7 +4,7 @@ from django.shortcuts import render
 from rest_framework import generics
 from rest_framework import permissions
 from .models import Booking, BookingCategory, BookingChat, ContactMessage
-from .serializers import BookingSerializer, BookingCategorySerializer, BookingChatSerializer, UserSerializer, ContactMessageSerializer, AdminBookingSerializer
+from .serializers import AdminBookingSerializer, BookingCategorySerializer, BookingChatSerializer, UserSerializer, ContactMessageSerializer, AdminBookingSerializer, UserBookingSerializer
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -24,7 +24,7 @@ class BookingCategoryListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
 class BookingListCreateView(generics.ListCreateAPIView):
-    serializer_class = BookingSerializer
+    serializer_class = UserBookingSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
@@ -180,3 +180,14 @@ class AllBookingsListView(generics.ListAPIView):
         ordering = self.request.query_params.get('ordering', '-created_at')
         queryset = queryset.order_by(ordering)
         return queryset
+
+class BookingDetailView(generics.RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminBookingSerializer
+    queryset = Booking.objects.all()
+
+    def get_object(self):
+        obj = super().get_object()
+        if not self.request.user.is_staff and obj.user != self.request.user:
+            raise PermissionDenied("You do not have access to this booking.")
+        return obj
